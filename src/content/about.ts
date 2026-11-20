@@ -26,7 +26,7 @@ export const aboutContent = {
     label: '01 / about',
     shortLabel: 'about',
     statement:
-      "I'm Nithin, a second-year Computer Science student at Amrita Vishwa Vidyapeetham, Coimbatore. My interest in computer science began with cybersecurity, which sparked my curiosity about how systems work and how they can be secured. I started building full-stack applications in my second semester and have since grown interested in backend engineering, AI-powered applications, and understanding the systems behind the products I build. I'm always exploring, experimenting, and looking for ways to get better.",
+      "I'm Nithin, a second-year Computer Science student at Amrita Vishwa Vidyapeetham, Coimbatore. My interest in computer science began with cybersecurity, which sparked my curiosity about how systems work and how they can be secured. I started building full-stack applications and have since grown interested in backend engineering, AI-powered applications, and understanding the systems behind the products I build. I'm always exploring, experimenting, and looking for ways to get better.",
     values: [
       {
         number: '01',
