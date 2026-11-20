@@ -5,7 +5,7 @@ export interface Project {
   slug: string
   title: string
   year: string
-  status: 'live' | 'building' | 'archived'
+  status: 'completed' | 'building'
   oneLine: string
   stack: string[]
   role: string
@@ -100,15 +100,9 @@ function validateProject(entry: RawParsedEntry, index: number): Project | null {
     return null
   }
 
-  // 4. Status: strictly "live" | "building" | "archived"
-  if (entry.status !== 'live' && entry.status !== 'building' && entry.status !== 'archived') {
-    if (import.meta.env.DEV) {
-      console.warn(
-        `[ProjectsValidator] Entry #${index + 1} (${entry.slug}) skipped: invalid status "${entry.status}"`
-      )
-    }
-    return null
-  }
+  // 4. Status: allowed values: "completed" | "building" (default "completed")
+  const status: 'completed' | 'building' =
+    entry.status === 'building' ? 'building' : 'completed'
 
   // 5. Problem & Built: max 600 chars each
   if (typeof entry.problem !== 'string' || entry.problem.length > 600) {
@@ -196,7 +190,7 @@ function validateProject(entry: RawParsedEntry, index: number): Project | null {
     slug: entry.slug,
     title: entry.title,
     year: entry.year,
-    status: entry.status,
+    status,
     oneLine: entry.oneLine,
     stack: entry.stack,
     role: entry.role,
@@ -273,17 +267,13 @@ export function loadProjects(): Project[] {
     const slug = meta['slug'] ? slugify(meta['slug']) : slugify(cleanTitle) || `project-${index + 1}`
     const year = meta['year'] || '2026'
 
-    // Status mapping: strictly "live" | "building" | "archived"
-    let status: 'live' | 'building' | 'archived' = 'building'
+    // Status mapping: "completed" | "building" (default "completed")
+    let status: 'completed' | 'building' = 'completed'
     const rawStatus = (meta['status'] || '').toLowerCase()
-    if (rawStatus === 'live' || rawStatus === 'building' || rawStatus === 'archived') {
-      status = rawStatus
-    } else if (meta['live'] && meta['live'].startsWith('http') && !meta['live'].includes('TODO')) {
-      status = 'live'
-    } else if (year < '2025') {
-      status = 'archived'
-    } else {
+    if (rawStatus === 'building') {
       status = 'building'
+    } else {
+      status = 'completed'
     }
 
     const oneLine = meta['tagline'] || meta['oneline'] || 'TODO one-line summary'

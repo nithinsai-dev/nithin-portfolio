@@ -5,6 +5,7 @@ export interface ProjectItem {
   tagline: string
   year: string
   role: string
+  status?: 'completed' | 'building'
   stack: string[]
   repo?: string
   live?: string
@@ -39,6 +40,7 @@ export function parseProjectsMarkdown(markdown: string): ProjectItem[] {
       tagline: 'TODO one-line summary',
       year: '2026',
       role: 'TODO',
+      status: 'completed',
       stack: ['TODO'],
       problem: 'TODO',
       built: 'TODO',
@@ -85,6 +87,13 @@ export function parseProjectsMarkdown(markdown: string): ProjectItem[] {
               break
             case 'role':
               if (val) project.role = val
+              break
+            case 'status':
+              if (val.toLowerCase() === 'building') {
+                project.status = 'building'
+              } else {
+                project.status = 'completed'
+              }
               break
             case 'stack':
               if (val) {

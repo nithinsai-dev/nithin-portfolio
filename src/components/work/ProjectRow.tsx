@@ -72,21 +72,14 @@ export default function ProjectRow({
               {project.year}
             </span>
 
-            {/* Status Pill */}
-            {project.status === 'live' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono tracking-wider bg-[#F2C14E]/10 border border-[#F2C14E]/40 text-[#F2C14E]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F2C14E] animate-pulse" />
-                <span>live</span>
-              </span>
-            )}
-            {project.status === 'building' && (
+            {/* Status Pill: data-driven (completed | building) */}
+            {project.status === 'building' ? (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono tracking-wider border border-dashed border-[#F2C14E]/60 text-[#F2C14E]">
                 building
               </span>
-            )}
-            {project.status === 'archived' && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono tracking-wider border border-[#E8DDD3]/20 text-[#E8DDD3]/40">
-                archived
+            ) : (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono tracking-wider border border-[#F2C14E]/60 text-[#F2C14E]">
+                completed
               </span>
             )}
           </div>

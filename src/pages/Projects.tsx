@@ -213,12 +213,18 @@ export default function Projects() {
         )}
       </main>
 
-      {/* Floating Hover Preview (Desktop fine pointer only) */}
-      <HoverPreview
-        project={hoveredProject}
-        coordsRef={hoverCoordsRef}
-        isVisible={hoveredProject !== null}
-      />
+      {/* Floating Hover Preview (Desktop fine pointer only): Appears ONLY on closed rows */}
+      {(() => {
+        const isClosedRowHovered =
+          hoveredProject !== null && hoveredProject.slug !== expandedSlug
+        return (
+          <HoverPreview
+            project={isClosedRowHovered ? hoveredProject : null}
+            coordsRef={hoverCoordsRef}
+            isVisible={isClosedRowHovered}
+          />
+        )
+      })()}
 
       {/* Site Footer */}
       <div className="relative z-20 w-full">

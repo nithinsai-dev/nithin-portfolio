@@ -26,8 +26,13 @@ export default function HoverPreview({
   const posRef = useRef({ x: -9999, y: -9999 })
   const wasVisibleRef = useRef(false)
 
+  // Only enable on devices with fine pointer and hover support (no coarse/touch)
+  const isTouchOrCoarse =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(pointer: coarse), (hover: none)').matches
+
   useEffect(() => {
-    if (!isVisible) {
+    if (!isVisible || isTouchOrCoarse) {
       wasVisibleRef.current = false
       posRef.current = { x: -9999, y: -9999 }
       return
@@ -89,9 +94,9 @@ export default function HoverPreview({
 
     animId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animId)
-  }, [isVisible, coordsRef])
+  }, [isVisible, coordsRef, isTouchOrCoarse])
 
-  if (!isVisible || !project) return null
+  if (!isVisible || !project || isTouchOrCoarse) return null
 
   const safeImg = project.image ? safeUrl(project.image) : null
 
