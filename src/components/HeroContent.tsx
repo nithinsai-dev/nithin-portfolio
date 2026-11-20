@@ -209,7 +209,7 @@ export default function HeroContent({ mode }: HeroContentProps) {
                       left: isMobile ? '0px' : '120px',
                     }}
                   >
-                    &lt;input&gt; unsanitized?
+                    {'<input> unsanitized?'}
                   </span>
                 </div>
               )}

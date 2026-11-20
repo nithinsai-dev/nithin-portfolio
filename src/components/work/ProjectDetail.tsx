@@ -70,7 +70,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
         {project.breakerNote && (
           <div className="border-l-2 border-[#F2C14E] pl-4 py-2 bg-[#F2C14E]/5 rounded-r">
             <div className="font-mono text-[11px] text-[#F2C14E] tracking-widest uppercase mb-1">
-              // breaker&apos;s note
+              // breaker's note
             </div>
             <p className="font-mono text-xs sm:text-sm text-[#E8DDD3]/90 leading-relaxed m-0 whitespace-pre-line">
               {project.breakerNote}
@@ -89,7 +89,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                 className="text-[#E8DDD3] hover:text-[#F2C14E] hover:underline underline-offset-4 decoration-[#F2C14E] transition-colors inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#F2C14E] rounded px-1"
               >
                 <span>Live</span>
-                <span className="text-[#F2C14E]">&nearr;</span>
+                <span className="text-[#F2C14E]" aria-hidden="true">↗</span>
               </a>
             )}
 
@@ -101,7 +101,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                 className="text-[#E8DDD3] hover:text-[#F2C14E] hover:underline underline-offset-4 decoration-[#F2C14E] transition-colors inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#F2C14E] rounded px-1"
               >
                 <span>GitHub</span>
-                <span className="text-[#F2C14E]">&nearr;</span>
+                <span className="text-[#F2C14E]" aria-hidden="true">↗</span>
               </a>
             )}
 
@@ -113,7 +113,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                 className="text-[#E8DDD3] hover:text-[#F2C14E] hover:underline underline-offset-4 decoration-[#F2C14E] transition-colors inline-flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#F2C14E] rounded px-1"
               >
                 <span>Full case study</span>
-                <span className="text-[#F2C14E]">&rarr;</span>
+                <span className="text-[#F2C14E]" aria-hidden="true">→</span>
               </a>
             )}
           </div>

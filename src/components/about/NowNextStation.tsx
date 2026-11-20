@@ -12,7 +12,7 @@ export default function NowNextStation({ isVisible, isMobile = false }: NowNextS
       <div className="flex flex-col gap-1.5">
         <div className="font-mono text-xs text-[#F2C14E] uppercase tracking-wider flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[#F2C14E]" />
-          <span>Now &middot; Active focus</span>
+          <span>Now · Active focus</span>
         </div>
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {aboutContent.nowNext.nowSkills.map((skill, i) => (
@@ -38,7 +38,7 @@ export default function NowNextStation({ isVisible, isMobile = false }: NowNextS
       <div className="flex flex-col gap-1.5 pt-1">
         <div className="font-mono text-xs text-[#E8DDD3]/70 uppercase tracking-wider flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full border border-dashed border-[#E8DDD3]/70" />
-          <span>Next &middot; Roadmap</span>
+          <span>Next · Roadmap</span>
         </div>
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {aboutContent.nowNext.nextSkills.map((skill, i) => (

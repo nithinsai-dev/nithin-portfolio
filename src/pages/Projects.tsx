@@ -205,8 +205,11 @@ export default function Projects() {
               className="font-mono text-xs sm:text-sm text-[#E8DDD3]/80 hover:text-[#F2C14E] hover:underline underline-offset-4 decoration-[#F2C14E] transition-colors inline-flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#F2C14E] rounded px-1.5 py-1"
             >
               <span>More on GitHub</span>
-              <span className="text-[#F2C14E] group-hover:translate-x-1.5 transition-transform duration-200">
-                &rarr;
+              <span
+                aria-hidden="true"
+                className="text-[#F2C14E] group-hover:translate-x-1.5 transition-transform duration-200"
+              >
+                →
               </span>
             </a>
           </div>

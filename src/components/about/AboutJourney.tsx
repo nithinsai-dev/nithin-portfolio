@@ -38,7 +38,7 @@ export default function AboutJourney() {
       >
         <div className="max-w-2xl mx-auto w-full flex flex-col">
           <div className="font-mono text-xs text-[#F2C14E] tracking-widest uppercase mb-8">
-            // journey &middot; {STATIONS_CONFIG.length} stations
+            // journey · {STATIONS_CONFIG.length} stations
           </div>
           {STATIONS_CONFIG.map((station) => (
             <JourneyPanel
@@ -100,9 +100,9 @@ export default function AboutJourney() {
           opacity: isHintVisible ? 1 : 0,
         }}
       >
-        <span className="text-[#F2C14E]">&darr;</span>
+        <span className="text-[#F2C14E]" aria-hidden="true">↓</span>
         <span>scroll to explore</span>
-        <span className="text-[#F2C14E]">&rarr;</span>
+        <span className="text-[#F2C14E]" aria-hidden="true">→</span>
       </div>
     </section>
   )

@@ -91,7 +91,7 @@ export default function CopyEmail({ email }: CopyEmailProps) {
         >
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#201415] border border-[#F2C14E]/50 text-[#F2C14E] font-mono text-xs shadow-lg shadow-black/80 backdrop-blur-md whitespace-nowrap -translate-x-1/2">
             <span>copied to clipboard</span>
-            <span>&check;</span>
+            <span aria-hidden="true">✓</span>
           </div>
         </div>
       )}

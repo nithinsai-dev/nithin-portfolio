@@ -45,7 +45,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               }}
               className="mt-2 font-mono text-xs text-[#140C0D] bg-[#F2C14E] px-4 py-2 rounded font-medium hover:bg-[#F2C14E]/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F2C14E] cursor-pointer"
             >
-              Return Home &rarr;
+              Return Home <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>

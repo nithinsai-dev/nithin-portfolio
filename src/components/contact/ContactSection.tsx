@@ -174,7 +174,7 @@ export default function ContactSection() {
             <div className="font-mono text-xs text-[#E8DDD3]/50 tracking-wider pt-1 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#F2C14E]/70 animate-pulse" />
               <span>
-                {contactContent.location || 'Coimbatore, IN'} &middot; {localTime}
+                {contactContent.location || 'Coimbatore, IN'} · {localTime}
               </span>
             </div>
           </div>

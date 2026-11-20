@@ -91,7 +91,7 @@ export default function MobileMenu({
           aria-label="Close menu"
           className="font-mono text-xs uppercase tracking-wider text-[#E8DDD3]/80 hover:text-[#F2C14E] transition-colors p-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#F2C14E] rounded cursor-pointer"
         >
-          [close &times;]
+          [close ×]
         </button>
       </div>
 

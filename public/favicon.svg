@@ -1,18 +1,1 @@
-<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="fav-coin" cx="45%" cy="40%" r="55%">
-      <stop offset="0%" stopColor="#FBD67A" />
-      <stop offset="60%" stopColor="#F2C14E" />
-      <stop offset="100%" stopColor="#C9982E" />
-    </radialGradient>
-  </defs>
-  <circle cx="50" cy="50" r="46" fill="url(#fav-coin)" stroke="#1A0F10" stroke-width="3" />
-  <circle cx="50" cy="50" r="40" stroke="#E5B33E" stroke-width="1.5" fill="none" opacity="0.9" />
-  <circle cx="50" cy="50" r="33" stroke="#1A0F10" stroke-width="1.2" fill="none" opacity="0.6" />
-  <!-- Three upward-pointing chevrons in dark wine #1A0F10 -->
-  <g stroke="#1A0F10" stroke-width="3.6" stroke-linecap="butt" stroke-linejoin="miter" fill="none">
-    <polyline points="37,39 50,29 63,39" />
-    <polyline points="37,51 50,41 63,51" />
-    <polyline points="37,63 50,53 63,63" />
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#F2C14E"/><g fill="none" stroke="#0a0707" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 L32 16 L47 30"/><path d="M17 46 L32 32 L47 46"/></g></svg>

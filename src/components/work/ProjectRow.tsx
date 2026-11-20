@@ -98,7 +98,7 @@ export default function ProjectRow({
               >
                 {tech}
                 {tIdx < Math.min(3, project.stack.length - 1) && (
-                  <span className="text-[#E8DDD3]/30 ml-2">&middot;</span>
+                  <span className="text-[#E8DDD3]/30 ml-2" aria-hidden="true">·</span>
                 )}
               </span>
             ))}
