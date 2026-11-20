@@ -48,7 +48,7 @@ Developed a full-stack fleet management application with JWT authentication and 
 - role: Frontend Developer
 - stack: React, TypeScript, Tailwind CSS, TanStack Router, GSAP, Framer Motion
 - repo: https://github.com/nithinsai-dev/OffScript
-- live:
+- live: https://off-script-eight.vercel.app/
 - image:/project/Offscript.png
 - xray:
 

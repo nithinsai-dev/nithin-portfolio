@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import HeroSplit from '../components/HeroSplit'
 import AboutSection from '../components/about/AboutSection'
 import ContactSection from '../components/contact/ContactSection'
-import { useDeviceCapabilities } from '../hooks/useDeviceCapabilities'
+import { useDeviceCapabilities, set3DChunkStatus } from '../hooks/useDeviceCapabilities'
 import { getTargetY, ScrollTargetName } from '../lib/scrollTargets'
 import {
   resetMotionToHeroState,
@@ -19,46 +19,76 @@ export default function Home() {
 
   // Load 3D stage and ScrollTrigger journey ONLY when 3D is allowed
   useEffect(() => {
-    if (!canRun3D) return
+    if (!canRun3D) {
+      set3DChunkStatus('skipped', '3D not allowed by device capability rules')
+      return
+    }
 
     let cancelled = false
     let timelineCleanup: (() => void) | null = null
 
-    Promise.all([
-      import('../components/ObjectStage'),
-      import('../lib/scrollTimeline'),
-    ]).then(([stageMod, timelineMod]) => {
-      if (cancelled) return
-      setStageComponent(() => stageMod.default)
-      timelineCleanup = timelineMod.initScrollTimeline()
+    set3DChunkStatus('pending')
 
-      // Handle initial hash or state target immediately after ScrollTrigger pin is mounted
-      const stateTarget = (location.state as { scrollTarget?: string })?.scrollTarget
-      const hash = window.location.hash.toLowerCase()
-      const rawTarget = stateTarget || (hash === '#about' ? 'about' : hash === '#contact' ? 'contact' : null)
-      const target = rawTarget as ScrollTargetName | null
-      if (target) {
-        requestAnimationFrame(() => {
-          const targetY = getTargetY(target)
-          window.scrollTo({ top: targetY, behavior: 'instant' })
-          if (target === 'top') {
-            resetMotionToHeroState()
-          } else if (target === 'contact') {
-            snapMotionToContactState()
-          } else if (target === 'about') {
-            snapMotionToAboutState()
-          }
-          const ST = (window as unknown as { ScrollTrigger?: typeof ScrollTrigger }).ScrollTrigger || ScrollTrigger
-          if (ST) {
-            ;(ST as unknown as { update: (reset?: boolean) => void }).update(true)
-            try {
-              ST.refresh()
-            } catch {}
-          }
-          window.dispatchEvent(new Event('scroll'))
-        })
+    const importWithRetry = async () => {
+      try {
+        return await Promise.all([
+          import('../components/ObjectStage'),
+          import('../lib/scrollTimeline'),
+        ])
+      } catch (err1) {
+        console.warn('[3D] First chunk load attempt failed, retrying once in 300ms...', err1)
+        set3DChunkStatus('retried', 'Retrying after first failure...')
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        try {
+          return await Promise.all([
+            import('../components/ObjectStage'),
+            import('../lib/scrollTimeline'),
+          ])
+        } catch (err2) {
+          console.error('[3D] Failed to load 3D chunks after retry:', err2)
+          throw err2
+        }
       }
-    })
+    }
+
+    importWithRetry()
+      .then(([stageMod, timelineMod]) => {
+        if (cancelled) return
+        set3DChunkStatus('loaded')
+        setStageComponent(() => stageMod.default)
+        timelineCleanup = timelineMod.initScrollTimeline()
+
+        // Handle initial hash or state target immediately after ScrollTrigger pin is mounted
+        const stateTarget = (location.state as { scrollTarget?: string })?.scrollTarget
+        const hash = window.location.hash.toLowerCase()
+        const rawTarget = stateTarget || (hash === '#about' ? 'about' : hash === '#contact' ? 'contact' : null)
+        const target = rawTarget as ScrollTargetName | null
+        if (target) {
+          requestAnimationFrame(() => {
+            const targetY = getTargetY(target)
+            window.scrollTo({ top: targetY, behavior: 'instant' })
+            if (target === 'top') {
+              resetMotionToHeroState()
+            } else if (target === 'contact') {
+              snapMotionToContactState()
+            } else if (target === 'about') {
+              snapMotionToAboutState()
+            }
+            const ST = (window as unknown as { ScrollTrigger?: typeof ScrollTrigger }).ScrollTrigger || ScrollTrigger
+            if (ST) {
+              ;(ST as unknown as { update: (reset?: boolean) => void }).update(true)
+              try {
+                ST.refresh()
+              } catch {}
+            }
+            window.dispatchEvent(new Event('scroll'))
+          })
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return
+        set3DChunkStatus('failed', String(err?.message || err))
+      })
 
     return () => {
       cancelled = true

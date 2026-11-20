@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { testWebGL } from '../hooks/useDeviceCapabilities'
 import {
   getObjectState,
   getSmoothedNormMouse,
@@ -359,19 +360,9 @@ export default function ObjectStage() {
     // 1. Check prefers-reduced-motion, mobile screens (<768px), or WebGL support
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const isMobile = window.innerWidth < 768
+    const glTest = testWebGL()
 
-    let hasWebGL = true
-    try {
-      const canvas = document.createElement('canvas')
-      hasWebGL = !!(
-        window.WebGLRenderingContext &&
-        (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-      )
-    } catch {
-      hasWebGL = false
-    }
-
-    if (prefersReducedMotion || isMobile || !hasWebGL) {
+    if (prefersReducedMotion || isMobile || !glTest.supported) {
       setIsSupported(false)
       return
     }

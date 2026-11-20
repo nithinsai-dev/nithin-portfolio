@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import ScrollHandler from './components/ScrollHandler'
 import CustomCursor from './components/CustomCursor'
+import Debug3DOverlay from './components/Debug3DOverlay'
 import SiteNav from './components/SiteNav'
 import PageTransition from './components/PageTransition'
 import { useDeviceCapabilities } from './hooks/useDeviceCapabilities'
@@ -29,6 +30,9 @@ export default function App() {
 
       {/* Custom Cursor & Gold Glow Light: Mounted ONLY on capable desktop devices */}
       {canRun3D && <CustomCursor />}
+
+      {/* Debug 3D Badge & Console Logger (?debug3d=1 only) */}
+      <Debug3DOverlay />
 
       <ScrollHandler />
 

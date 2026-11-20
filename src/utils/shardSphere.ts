@@ -29,7 +29,8 @@ export function getShardDefinitions(): ShardDef[] {
   if (cachedShards) return cachedShards
 
   const prng = createSeededRandom(1337)
-  const baseIcosa = new THREE.IcosahedronGeometry(1, 1).toNonIndexed()
+  const icosaGeo = new THREE.IcosahedronGeometry(1, 1)
+  const baseIcosa = icosaGeo.index ? icosaGeo.toNonIndexed() : icosaGeo
   const pos = baseIcosa.attributes.position.array
   const faceCount = pos.length / 9 // 80 faces
 
@@ -305,14 +306,17 @@ export function getCoinBodyGeometry(): THREE.BufferGeometry {
 
   // 1. Chunky coin body (radius 0.42, height 0.1, 64 segments)
   // Rotated so circular faces face along Z and it stands vertically on edge
-  const bodyGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.1, 64).toNonIndexed()
+  const rawBody = new THREE.CylinderGeometry(0.42, 0.42, 0.1, 64)
+  const bodyGeo = rawBody.index ? rawBody.toNonIndexed() : rawBody
   bodyGeo.rotateX(Math.PI / 2)
 
   // 2. Slightly raised rim on both circular faces
-  const rimFront = new THREE.TorusGeometry(0.405, 0.015, 12, 64).toNonIndexed()
+  const rawRimFront = new THREE.TorusGeometry(0.405, 0.015, 12, 64)
+  const rimFront = rawRimFront.index ? rawRimFront.toNonIndexed() : rawRimFront
   rimFront.translate(0, 0, 0.05)
 
-  const rimBack = new THREE.TorusGeometry(0.405, 0.015, 12, 64).toNonIndexed()
+  const rawRimBack = new THREE.TorusGeometry(0.405, 0.015, 12, 64)
+  const rimBack = rawRimBack.index ? rawRimBack.toNonIndexed() : rawRimBack
   rimBack.translate(0, 0, -0.05)
 
   const merged = mergeGeometries([bodyGeo, rimFront, rimBack], false)
