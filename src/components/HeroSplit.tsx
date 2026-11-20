@@ -35,9 +35,17 @@ export default function HeroSplit() {
     let animId: number
     const check = () => {
       const s = getObjectState()
-      setTimelineState({
-        dividerProgress: s.dividerProgress,
-        breakerOpacity: s.breakerOpacity,
+      setTimelineState((prev) => {
+        if (
+          Math.abs(prev.dividerProgress - s.dividerProgress) < 0.0001 &&
+          Math.abs(prev.breakerOpacity - s.breakerOpacity) < 0.0001
+        ) {
+          return prev
+        }
+        return {
+          dividerProgress: s.dividerProgress,
+          breakerOpacity: s.breakerOpacity,
+        }
       })
       animId = requestAnimationFrame(check)
     }

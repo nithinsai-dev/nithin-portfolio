@@ -1,58 +1,54 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Project } from '../../lib/loadProjects'
 import { safeUrl } from '../../lib/safeUrl'
 
-interface HoverPreviewProps {
-  project: Project | null
+export interface HoverCoords {
   mouseX: number
   mouseY: number
-  rowRatio?: number
+  rowRatio: number
+}
+
+interface HoverPreviewProps {
+  project: Project | null
+  coordsRef: React.RefObject<HoverCoords>
   isVisible: boolean
 }
 
 export default function HoverPreview({
   project,
-  mouseX,
-  mouseY,
-  rowRatio = 0.5,
+  coordsRef,
   isVisible,
 }: HoverPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const posRef = useRef({ x: mouseX, y: mouseY })
+  const builderClipRef = useRef<HTMLDivElement>(null)
+  const breakerClipRef = useRef<HTMLDivElement>(null)
+  const splitLineRef = useRef<HTMLDivElement>(null)
+  const posRef = useRef({ x: -9999, y: -9999 })
   const wasVisibleRef = useRef(false)
-  const [localSplitX, setLocalSplitX] = useState(130) // split at center of 260px preview
 
-  // On pointerenter, initialize immediately from current mouse position - never lerp from 0,0 or -9999
-  useEffect(() => {
-    if (isVisible && !wasVisibleRef.current) {
-      posRef.current = { x: mouseX, y: mouseY }
-    }
-    wasVisibleRef.current = isVisible
-  }, [isVisible, mouseX, mouseY])
-
-  // Reset state when not visible
   useEffect(() => {
     if (!isVisible) {
+      wasVisibleRef.current = false
       posRef.current = { x: -9999, y: -9999 }
+      return
     }
-  }, [isVisible])
-
-  // Update split divider to follow cursor across the full 260px width of the preview
-  useEffect(() => {
-    if (isVisible) {
-      const split = Math.round(Math.max(10, Math.min(250, rowRatio * 260)))
-      setLocalSplitX(split)
-    }
-  }, [rowRatio, isVisible])
-
-  useEffect(() => {
-    if (!isVisible) return
 
     let animId: number
     const animate = () => {
-      // Light lag interpolation (0.18)
-      posRef.current.x += (mouseX - posRef.current.x) * 0.18
-      posRef.current.y += (mouseY - posRef.current.y) * 0.18
+      const coords = coordsRef.current
+      const targetX = coords ? coords.mouseX : -9999
+      const targetY = coords ? coords.mouseY : -9999
+      const ratio = coords ? coords.rowRatio : 0.5
+
+      // On pointerenter, snap immediately to mouse position without lerping from 0,0 or -9999
+      if (!wasVisibleRef.current && targetX > 0 && targetY > 0) {
+        posRef.current = { x: targetX, y: targetY }
+        wasVisibleRef.current = true
+      } else {
+        // Light lag interpolation (0.18)
+        posRef.current.x += (targetX - posRef.current.x) * 0.18
+        posRef.current.y += (targetY - posRef.current.y) * 0.18
+      }
 
       if (containerRef.current) {
         const winW = window.innerWidth
@@ -72,6 +68,20 @@ export default function HoverPreview({
         const clampedTop = Math.max(16, Math.min(winH - cardHeight - 16, targetTop))
 
         containerRef.current.style.transform = `translate3d(${clampedLeft}px, ${clampedTop}px, 0)`
+
+        // Update split divider directly on the DOM (clip-path and split line position)
+        const split = Math.round(Math.max(10, Math.min(250, ratio * 260)))
+        if (builderClipRef.current) {
+          builderClipRef.current.style.clipPath = `inset(0 calc(100% - ${split}px) 0 0)`
+          ;(builderClipRef.current.style as CSSStyleDeclaration & { WebkitClipPath: string }).WebkitClipPath = `inset(0 calc(100% - ${split}px) 0 0)`
+        }
+        if (breakerClipRef.current) {
+          breakerClipRef.current.style.clipPath = `inset(0 0 0 ${split}px)`
+          ;(breakerClipRef.current.style as CSSStyleDeclaration & { WebkitClipPath: string }).WebkitClipPath = `inset(0 0 0 ${split}px)`
+        }
+        if (splitLineRef.current) {
+          splitLineRef.current.style.left = `${split}px`
+        }
       }
 
       animId = requestAnimationFrame(animate)
@@ -79,7 +89,7 @@ export default function HoverPreview({
 
     animId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animId)
-  }, [mouseX, mouseY, isVisible])
+  }, [isVisible, coordsRef])
 
   if (!isVisible || !project) return null
 
@@ -91,14 +101,16 @@ export default function HoverPreview({
       aria-hidden="true"
       className="pointer-events-none fixed top-0 left-0 z-40 w-[260px] h-[170px] rounded-lg overflow-hidden border border-[#E8DDD3]/20 bg-[#140C0D] shadow-2xl shadow-black/80 will-change-transform select-none hidden md:block"
       style={{
-        transform: `translate3d(${mouseX > 0 ? mouseX + 24 : -9999}px, ${mouseY > 0 ? mouseY - 85 : -9999}px, 0)`,
+        transform: 'translate3d(-9999px, -9999px, 0)',
       }}
     >
       {/* 1. Left (Builder) Side: Normal Image or Screenshot Frame */}
       <div
+        ref={builderClipRef}
         className="absolute inset-0 w-full h-full overflow-hidden"
         style={{
-          clipPath: `inset(0 calc(100% - ${localSplitX}px) 0 0)`,
+          clipPath: 'inset(0 calc(100% - 130px) 0 0)',
+          WebkitClipPath: 'inset(0 calc(100% - 130px) 0 0)',
         }}
       >
         {safeImg ? (
@@ -121,9 +133,11 @@ export default function HoverPreview({
 
       {/* 2. Right (Breaker) Side: Grayscale + Brightness 0.6 + Dashed Grid + Breaker Tags */}
       <div
+        ref={breakerClipRef}
         className="absolute inset-0 w-full h-full overflow-hidden"
         style={{
-          clipPath: `inset(0 0 0 ${localSplitX}px)`,
+          clipPath: 'inset(0 0 0 130px)',
+          WebkitClipPath: 'inset(0 0 0 130px)',
         }}
       >
         {safeImg ? (
@@ -168,8 +182,9 @@ export default function HoverPreview({
 
       {/* 3. Thin Yellow Split Line */}
       <div
+        ref={splitLineRef}
         className="absolute top-0 bottom-0 w-[1.5px] bg-[#F2C14E] z-10 pointer-events-none shadow-[0_0_8px_rgba(242,193,78,0.8)]"
-        style={{ left: `${localSplitX}px` }}
+        style={{ left: '130px' }}
       />
     </div>
   )

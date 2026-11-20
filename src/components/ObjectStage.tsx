@@ -400,11 +400,21 @@ export default function ObjectStage() {
 
       // Effective divider coordinate accounting for scroll progress
       const effX = hero.dividerX + (winW - hero.dividerX) * s.dividerProgress
-      setDividerState({
-        x: effX,
-        progress: s.dividerProgress,
-        wireMounted: s.isWireMounted,
-        opacity: s.opacity,
+      setDividerState((prev) => {
+        if (
+          Math.abs(prev.x - effX) < 0.25 &&
+          Math.abs(prev.progress - s.dividerProgress) < 0.001 &&
+          prev.wireMounted === s.isWireMounted &&
+          Math.abs(prev.opacity - s.opacity) < 0.001
+        ) {
+          return prev
+        }
+        return {
+          x: effX,
+          progress: s.dividerProgress,
+          wireMounted: s.isWireMounted,
+          opacity: s.opacity,
+        }
       })
 
       animId = requestAnimationFrame(checkState)

@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react'
 import HeroMobileObject from './HeroMobileObject'
-import { useTransitionNavigate } from '../hooks/useTransitionNavigate'
 import { useDeviceCapabilities } from '../hooks/useDeviceCapabilities'
 import { useIsMobile } from '../hooks/useIsMobile'
 
@@ -12,7 +11,6 @@ interface HeroContentProps {
 
 export default function HeroContent({ mode }: HeroContentProps) {
   const isBreaker = mode === 'breaker'
-  const { navigateWithTransition } = useTransitionNavigate()
   const { canRun3D } = useDeviceCapabilities()
   const isMobile = useIsMobile()
 
@@ -101,17 +99,12 @@ export default function HeroContent({ mode }: HeroContentProps) {
             font-size: max(13px, 3.6vw) !important;
             white-space: nowrap !important;
           }
-          .hero-link-wrap {
-            margin-top: 0.5rem !important;
-            padding: 0 !important;
-          }
         }
       `}</style>
 
       <div
-        className={`hero-main-container relative w-full h-full flex flex-col justify-between p-6 sm:p-10 md:p-14 bg-transparent text-[#E8DDD3] select-none ${
-          isBreaker ? 'pointer-events-none' : ''
-        }`}
+        className={`hero-main-container relative w-full h-full flex flex-col justify-between p-6 sm:p-10 md:p-14 bg-transparent text-[#E8DDD3] select-none ${isBreaker ? 'pointer-events-none' : ''
+          }`}
       >
         {/* 3D Wireframe Mesh Background - Loaded dynamically ONLY on desktop in Breaker mode when 3D is allowed */}
         {isBreaker && canRun3D && !isMobile && (
@@ -179,8 +172,8 @@ export default function HeroContent({ mode }: HeroContentProps) {
         <div className="flex-1" />
 
         {/* Bottom Row:
-            Desktop: Name + Subtitle on bottom-left, "selected works →" on bottom-right
-            Mobile: Positioned at 60svh, 4vw padding, stacking Name -> Tagline -> Link */}
+            Desktop: Name + Subtitle on bottom-left
+            Mobile: Positioned at 60svh, 4vw padding, stacking Name -> Tagline */}
         <div className="hero-bottom-row relative w-full flex flex-col sm:flex-row sm:items-end justify-between gap-6 z-20">
           {/* Bottom-left: Name + Tagline */}
           <div className="flex flex-col -ml-[1vw]">
@@ -237,55 +230,6 @@ export default function HeroContent({ mode }: HeroContentProps) {
                     w:260 h:20
                   </span>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom-right: "selected works →" link */}
-          <div className="hero-link-wrap sm:pb-4 sm:pr-2">
-            <div className="relative inline-block">
-              <a
-                href="/projects"
-                tabIndex={isBreaker ? -1 : undefined}
-                aria-hidden={isBreaker ? true : undefined}
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (!isBreaker) {
-                    navigateWithTransition('/projects', { destination: 'Work' })
-                  }
-                }}
-                className="font-mono text-xs sm:text-sm text-[#E8DDD3]/90 hover:text-[#F2C14E] transition-colors inline-flex items-center gap-1.5 group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#F2C14E] rounded px-1"
-              >
-                <span>selected works</span>
-                <span className="text-[#F2C14E] group-hover:translate-x-1.5 transition-transform duration-200 inline-block">
-                  &rarr;
-                </span>
-              </a>
-
-              {/* Breaker Link Overlay:
-                  Desktop: Bounding box with size label above (-14px), rate-limit tag below (calc(100% + 6px))
-                  Mobile: rate-limit tag directly below link (no dashed box, no size label) */}
-              {isBreaker && (
-                <>
-                  <div className="hidden md:block absolute -inset-1.5 border border-dashed border-[#E8DDD3]/40 pointer-events-none">
-                    <span
-                      className="breaker-size-label"
-                      style={{ top: '-14px', left: '0px' }}
-                    >
-                      w:138 h:28
-                    </span>
-                  </div>
-
-                  <span
-                    className="breaker-tag breaker-tag-yellow"
-                    style={{
-                      top: 'calc(100% + 6px)',
-                      right: '0px',
-                    }}
-                  >
-                    rate-limit: none
-                  </span>
-                </>
               )}
             </div>
           </div>

@@ -40,12 +40,23 @@ export function useJourneyProgress(): JourneyProgressState {
         }
       }
 
-      setState({
-        progress: p,
-        activeStationIndex: activeIdx,
-        isHintVisible: p < 0.02 && s.journeyActive,
-        journeyActive: s.journeyActive && s.opacity > 0.1 && cFade > 0.01,
-        contactFade: cFade,
+      setState((prev) => {
+        if (
+          Math.abs(prev.progress - p) < 0.0001 &&
+          prev.activeStationIndex === activeIdx &&
+          prev.isHintVisible === (p < 0.02 && s.journeyActive) &&
+          prev.journeyActive === (s.journeyActive && s.opacity > 0.1 && cFade > 0.01) &&
+          Math.abs(prev.contactFade - cFade) < 0.0001
+        ) {
+          return prev
+        }
+        return {
+          progress: p,
+          activeStationIndex: activeIdx,
+          isHintVisible: p < 0.02 && s.journeyActive,
+          journeyActive: s.journeyActive && s.opacity > 0.1 && cFade > 0.01,
+          contactFade: cFade,
+        }
       })
 
       animId = requestAnimationFrame(check)

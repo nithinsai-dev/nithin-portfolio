@@ -5,6 +5,7 @@ import {
   useTransitionNavigate,
   DestinationName,
 } from '../hooks/useTransitionNavigate'
+import { set3DRenderPaused } from '../hooks/useObjectMotion'
 
 const COLUMNS = [0, 1, 2, 3, 4]
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const
@@ -18,7 +19,18 @@ export default function PageTransition() {
   const { navigateWithTransition } = useTransitionNavigate()
 
   useEffect(() => {
-    return subscribeTransition(setState)
+    const unsub = subscribeTransition((nextState) => {
+      setState(nextState)
+      if (nextState.phase === 'covering' || nextState.phase === 'holding') {
+        set3DRenderPaused(true)
+      } else if (nextState.phase === 'revealing' || nextState.phase === 'idle') {
+        set3DRenderPaused(false)
+      }
+    })
+    return () => {
+      unsub()
+      set3DRenderPaused(false)
+    }
   }, [])
 
   // Listen for browser back / forward buttons (popstate)

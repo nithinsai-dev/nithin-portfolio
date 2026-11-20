@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { set3DRenderPaused } from '../hooks/useObjectMotion'
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -23,10 +24,11 @@ export default function MobileMenu({
   const containerRef = useRef<HTMLDivElement>(null)
   const firstButtonRef = useRef<HTMLButtonElement>(null)
 
-  // Body scroll lock and Escape key listener
+  // Body scroll lock, Escape key listener, and 3D render pause
   useEffect(() => {
     if (!isOpen) return
 
+    set3DRenderPaused(true)
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
@@ -61,6 +63,7 @@ export default function MobileMenu({
     firstButtonRef.current?.focus()
 
     return () => {
+      set3DRenderPaused(false)
       document.body.style.overflow = originalOverflow
       window.removeEventListener('keydown', handleKeyDown)
     }

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { loadProjects, Project } from '../lib/loadProjects'
 import { contactContent } from '../content/contact'
 import Reveal from '../components/Reveal'
 import ProjectRow from '../components/work/ProjectRow'
-import HoverPreview from '../components/work/HoverPreview'
+import HoverPreview, { HoverCoords } from '../components/work/HoverPreview'
 import SiteFooter from '../components/contact/SiteFooter'
 import { useDeviceCapabilities } from '../hooks/useDeviceCapabilities'
 import { safeUrl } from '../lib/safeUrl'
@@ -22,18 +22,16 @@ export default function Projects() {
     }
   }, [])
 
-  // Hover state for floating preview
+  // Discrete hover state for floating preview
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
-  const [mousePos, setMousePos] = useState({ x: -9999, y: -9999 })
-  const [rowRatio, setRowRatio] = useState(0.5)
-  const [isHoveringRow, setIsHoveringRow] = useState(false)
+  // Continuous pointer coords and ratio kept in a ref to eliminate re-renders on mousemove
+  const hoverCoordsRef = useRef<HoverCoords>({ mouseX: -9999, mouseY: -9999, rowRatio: 0.5 })
 
   // Reset hover state on unmount / route leave
   useEffect(() => {
     return () => {
-      setIsHoveringRow(false)
       setHoveredProject(null)
-      setMousePos({ x: -9999, y: -9999 })
+      hoverCoordsRef.current = { mouseX: -9999, mouseY: -9999, rowRatio: 0.5 }
     }
   }, [])
 
@@ -107,22 +105,34 @@ export default function Projects() {
     }
   }
 
-  const handleRowMouseMove = (e: React.MouseEvent, project: Project) => {
+  const handleRowMouseEnter = (e: React.MouseEvent, project: Project) => {
     const currentTarget = e.currentTarget as HTMLElement
     const rect = currentTarget.getBoundingClientRect()
     const relativeX = e.clientX - rect.left
     const ratio = rect.width > 0 ? Math.max(0, Math.min(1, relativeX / rect.width)) : 0.5
 
-    setMousePos({ x: e.clientX, y: e.clientY })
-    setRowRatio(ratio)
+    hoverCoordsRef.current.mouseX = e.clientX
+    hoverCoordsRef.current.mouseY = e.clientY
+    hoverCoordsRef.current.rowRatio = ratio
     setHoveredProject(project)
-    setIsHoveringRow(true)
+  }
+
+  const handleRowMouseMove = (e: React.MouseEvent) => {
+    const currentTarget = e.currentTarget as HTMLElement
+    const rect = currentTarget.getBoundingClientRect()
+    const relativeX = e.clientX - rect.left
+    const ratio = rect.width > 0 ? Math.max(0, Math.min(1, relativeX / rect.width)) : 0.5
+
+    // Direct ref mutation: zero React re-renders on mousemove
+    hoverCoordsRef.current.mouseX = e.clientX
+    hoverCoordsRef.current.mouseY = e.clientY
+    hoverCoordsRef.current.rowRatio = ratio
   }
 
   const handleRowMouseLeave = () => {
-    setIsHoveringRow(false)
+    hoverCoordsRef.current.mouseX = -9999
+    hoverCoordsRef.current.mouseY = -9999
     setHoveredProject(null)
-    setMousePos({ x: -9999, y: -9999 })
   }
 
   const counterStr = `${String(projects.length).padStart(2, '0')} projects`
@@ -173,10 +183,10 @@ export default function Projects() {
                 index={idx}
                 isExpanded={expandedSlug === project.slug}
                 isHovered={hoveredProject?.slug === project.slug}
-                isAnyHovered={isHoveringRow}
+                isAnyHovered={hoveredProject !== null}
                 onToggle={() => handleToggleRow(project.slug)}
-                onMouseEnter={(e) => handleRowMouseMove(e, project)}
-                onMouseMove={(e) => handleRowMouseMove(e, project)}
+                onMouseEnter={(e) => handleRowMouseEnter(e, project)}
+                onMouseMove={handleRowMouseMove}
                 onMouseLeave={handleRowMouseLeave}
               />
               {/* Hairline Separator with line reveal */}
@@ -206,10 +216,8 @@ export default function Projects() {
       {/* Floating Hover Preview (Desktop fine pointer only) */}
       <HoverPreview
         project={hoveredProject}
-        mouseX={mousePos.x}
-        mouseY={mousePos.y}
-        rowRatio={rowRatio}
-        isVisible={isHoveringRow}
+        coordsRef={hoverCoordsRef}
+        isVisible={hoveredProject !== null}
       />
 
       {/* Site Footer */}

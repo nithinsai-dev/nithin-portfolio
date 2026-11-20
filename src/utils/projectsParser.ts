@@ -22,18 +22,20 @@ export function parseProjectsMarkdown(markdown: string): ProjectItem[] {
   // Split by markdown h2 headers (## )
   const rawSections = markdown.split(/\n(?=##\s+)/g)
 
-  rawSections.forEach((sectionStr, index) => {
+  let projectIndex = 0
+  rawSections.forEach((sectionStr) => {
     const trimmed = sectionStr.trim()
     if (!trimmed || !trimmed.startsWith('##')) return
 
+    projectIndex++
     const lines = trimmed.split('\n')
     const headerLine = lines[0].replace(/^##\s+/, '').trim()
-    const id = String(index + 1).padStart(2, '0')
+    const id = String(projectIndex).padStart(2, '0')
 
     const project: ProjectItem = {
       id,
       title: headerLine || `Project ${id}`,
-      slug: `project-${index + 1}`,
+      slug: `project-${projectIndex}`,
       tagline: 'TODO one-line summary',
       year: '2026',
       role: 'TODO',

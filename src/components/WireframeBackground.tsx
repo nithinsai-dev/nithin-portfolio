@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from 'react'
+import React, { useRef, useEffect, useState, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -24,7 +24,7 @@ function StaticSvgWireframe() {
   )
 }
 
-function MeshScene({ mouse }: { mouse: { x: number; y: number } }) {
+function MeshScene({ mouseRef }: { mouseRef: React.RefObject<{ x: number; y: number }> }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const pointsRef = useRef<THREE.Points>(null)
 
@@ -39,10 +39,11 @@ function MeshScene({ mouse }: { mouse: { x: number; y: number } }) {
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime() * 0.4
+    const m = mouseRef.current || { x: 0, y: 0 }
     if (meshRef.current) {
       // Gentle tilt toward cursor
-      meshRef.current.rotation.x = -0.4 + mouse.y * 0.15 + Math.sin(t * 0.5) * 0.05
-      meshRef.current.rotation.y = mouse.x * 0.2 + Math.cos(t * 0.4) * 0.05
+      meshRef.current.rotation.x = -0.4 + m.y * 0.15 + Math.sin(t * 0.5) * 0.05
+      meshRef.current.rotation.y = m.x * 0.2 + Math.cos(t * 0.4) * 0.05
       meshRef.current.rotation.z = Math.sin(t * 0.3) * 0.02
 
       // Wave displacement
@@ -93,7 +94,7 @@ function MeshScene({ mouse }: { mouse: { x: number; y: number } }) {
 export default function WireframeBackground() {
   const [isTabVisible, setIsTabVisible] = useState(true)
   const [isSupported, setIsSupported] = useState(true)
-  const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  const mouseRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     // Check reduced motion or small mobile screens or lack of WebGL
@@ -111,11 +112,10 @@ export default function WireframeBackground() {
     }
     document.addEventListener('visibilitychange', handleVisibility)
 
-    // Cursor tracking for subtle tilt
+    // Cursor tracking for subtle tilt without triggering React re-renders
     const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 2 - 1
-      const y = -(e.clientY / window.innerHeight) * 2 + 1
-      setMouse({ x, y })
+      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1
+      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1
     }
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
@@ -138,7 +138,7 @@ export default function WireframeBackground() {
         gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
         style={{ pointerEvents: 'none' }}
       >
-        <MeshScene mouse={mouse} />
+        <MeshScene mouseRef={mouseRef} />
       </Canvas>
     </div>
   )
