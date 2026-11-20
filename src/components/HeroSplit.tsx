@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import HeroContent from './HeroContent'
 import Divider from './Divider'
-import { setHeroDivider, setHeroDragging } from '../store/heroStore'
+import { setHeroDivider, setHeroDragging, clearHeroState } from '../store/heroStore'
 import { getObjectState, subscribeObjectMotion } from '../hooks/useObjectMotion'
 import { useIsMobile } from '../hooks/useIsMobile'
 
@@ -62,6 +62,13 @@ export default function HeroSplit() {
     window.addEventListener('resize', updateDimensions)
     return () => window.removeEventListener('resize', updateDimensions)
   }, [updateDimensions])
+
+  // Clear hero state on unmount so stale bounds never leak across client-side routes
+  useEffect(() => {
+    return () => {
+      clearHeroState()
+    }
+  }, [])
 
   // Intro sweep on mount:
   // Desktop: starts at 50%, sweeps to ~30%, then ~65%, then rests at 50% over ~2.1s (starting 0.4s after load).

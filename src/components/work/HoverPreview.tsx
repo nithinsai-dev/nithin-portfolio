@@ -6,6 +6,7 @@ interface HoverPreviewProps {
   project: Project | null
   mouseX: number
   mouseY: number
+  rowRatio?: number
   isVisible: boolean
 }
 
@@ -13,37 +14,64 @@ export default function HoverPreview({
   project,
   mouseX,
   mouseY,
+  rowRatio = 0.5,
   isVisible,
 }: HoverPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const posRef = useRef({ x: mouseX, y: mouseY })
+  const wasVisibleRef = useRef(false)
   const [localSplitX, setLocalSplitX] = useState(130) // split at center of 260px preview
+
+  // On pointerenter, initialize immediately from current mouse position - never lerp from 0,0 or -9999
+  useEffect(() => {
+    if (isVisible && !wasVisibleRef.current) {
+      posRef.current = { x: mouseX, y: mouseY }
+    }
+    wasVisibleRef.current = isVisible
+  }, [isVisible, mouseX, mouseY])
+
+  // Reset state when not visible
+  useEffect(() => {
+    if (!isVisible) {
+      posRef.current = { x: -9999, y: -9999 }
+    }
+  }, [isVisible])
+
+  // Update split divider to follow cursor across the full 260px width of the preview
+  useEffect(() => {
+    if (isVisible) {
+      const split = Math.round(Math.max(10, Math.min(250, rowRatio * 260)))
+      setLocalSplitX(split)
+    }
+  }, [rowRatio, isVisible])
 
   useEffect(() => {
     if (!isVisible) return
 
     let animId: number
     const animate = () => {
-      // Light lag interpolation (0.16)
-      posRef.current.x += (mouseX - posRef.current.x) * 0.16
-      posRef.current.y += (mouseY - posRef.current.y) * 0.16
+      // Light lag interpolation (0.18)
+      posRef.current.x += (mouseX - posRef.current.x) * 0.18
+      posRef.current.y += (mouseY - posRef.current.y) * 0.18
 
       if (containerRef.current) {
-        // Position preview slightly offset to top-right of cursor
-        const targetLeft = posRef.current.x + 24
-        const targetTop = posRef.current.y - 85
-
-        // Clamp inside viewport
         const winW = window.innerWidth
         const winH = window.innerHeight
-        const clampedLeft = Math.max(16, Math.min(winW - 276, targetLeft))
-        const clampedTop = Math.max(16, Math.min(winH - 186, targetTop))
+        const cardWidth = 260
+        const cardHeight = 170
+
+        // If card would overflow right edge, flip to left of cursor
+        const flipLeft = posRef.current.x + 24 + cardWidth > winW - 16
+        const targetLeft = flipLeft
+          ? posRef.current.x - cardWidth - 24
+          : posRef.current.x + 24
+        const targetTop = posRef.current.y - 85
+
+        // Clamp inside viewport so preview never clips or appears offscreen
+        const clampedLeft = Math.max(16, Math.min(winW - cardWidth - 16, targetLeft))
+        const clampedTop = Math.max(16, Math.min(winH - cardHeight - 16, targetTop))
 
         containerRef.current.style.transform = `translate3d(${clampedLeft}px, ${clampedTop}px, 0)`
-
-        // Calculate split inside the 260px container based on cursor's horizontal position
-        const relX = mouseX - clampedLeft
-        setLocalSplitX(Math.max(20, Math.min(240, relX)))
       }
 
       animId = requestAnimationFrame(animate)
@@ -63,7 +91,7 @@ export default function HoverPreview({
       aria-hidden="true"
       className="pointer-events-none fixed top-0 left-0 z-40 w-[260px] h-[170px] rounded-lg overflow-hidden border border-[#E8DDD3]/20 bg-[#140C0D] shadow-2xl shadow-black/80 will-change-transform select-none hidden md:block"
       style={{
-        transform: `translate3d(${mouseX + 24}px, ${mouseY - 85}px, 0)`,
+        transform: `translate3d(${mouseX > 0 ? mouseX + 24 : -9999}px, ${mouseY > 0 ? mouseY - 85 : -9999}px, 0)`,
       }}
     >
       {/* 1. Left (Builder) Side: Normal Image or Screenshot Frame */}

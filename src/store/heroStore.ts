@@ -44,6 +44,11 @@ export function setHeroDragging(isDragging: boolean) {
   heroState.isDragging = isDragging
 }
 
+export function clearHeroState() {
+  heroState.heroBounds = null
+  heroState.isDragging = false
+}
+
 export function getHeroState(): Readonly<HeroState> {
   return heroState
 }

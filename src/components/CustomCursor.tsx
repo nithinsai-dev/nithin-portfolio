@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { getHeroState } from '../store/heroStore'
 
+export const CONTACT_TEXT_RING_SIZE = 34
+
 export default function CustomCursor() {
   const glowRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLDivElement>(null)
@@ -85,9 +87,10 @@ export default function CustomCursor() {
       isVisible = true
     }
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    window.addEventListener('pointermove', handleMouseMove, { passive: true })
     document.addEventListener('mouseleave', handleMouseLeave)
     document.addEventListener('mouseenter', handleMouseEnter)
+    window.addEventListener('blur', handleMouseLeave)
 
     const animate = () => {
       if (isVisible) {
@@ -164,9 +167,9 @@ export default function CustomCursor() {
           ringBg = 'rgba(242, 193, 78, 0.12)'
           hideDot = true
         } else if (isOverContactText) {
-          // Hover over contact text: hide/shrink ring so it never obscures the typography
-          ringSize = 0
-          ringBorder = 'none'
+          // Hover over contact text: do NOT shrink, use tunable CONTACT_TEXT_RING_SIZE (34px)
+          ringSize = CONTACT_TEXT_RING_SIZE
+          ringBorder = '1px solid rgba(232, 221, 211, 0.55)'
           ringBg = 'transparent'
         } else if (isOverDivider && inHero) {
           // Hover over divider handle: shows "drag" label strictly inside hero
@@ -176,7 +179,7 @@ export default function CustomCursor() {
           showLabel = true
           labelText = 'drag'
         } else if (isBreaker) {
-          // Breaker state: crosshair + dashed ring + coordinates label
+          // Breaker state (inside hero AND right of divider): crosshair + dashed ring + coordinates in BREAK mode only
           ringSize = 34
           ringBorder = '1px dashed rgba(242, 193, 78, 0.65)'
           ringBg = 'transparent'
@@ -220,9 +223,15 @@ export default function CustomCursor() {
         // Live coordinates label ("x:812 y:304") in Geist Mono, 10px, sand
         if (coordsRef.current) {
           if (showCoords) {
-            coordsRef.current.style.transform = `translate3d(${ringX + 22}px, ${ringY - 7}px, 0)`
-            coordsRef.current.style.opacity = '1'
             coordsRef.current.textContent = `x:${Math.round(mouseX)} y:${Math.round(mouseY)}`
+
+            // Flip to left of cursor near right edge and clamp within viewport
+            const isNearRightEdge = ringX + 85 > window.innerWidth - 12
+            const coordsX = isNearRightEdge ? ringX - 85 : ringX + 22
+            const coordsY = Math.max(8, Math.min(window.innerHeight - 20, ringY - 7))
+
+            coordsRef.current.style.transform = `translate3d(${coordsX}px, ${coordsY}px, 0)`
+            coordsRef.current.style.opacity = '1'
           } else {
             coordsRef.current.style.opacity = '0'
           }
@@ -242,16 +251,17 @@ export default function CustomCursor() {
 
     return () => {
       document.documentElement.classList.remove('custom-cursor-active')
-      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('pointermove', handleMouseMove)
       document.removeEventListener('mouseleave', handleMouseLeave)
       document.removeEventListener('mouseenter', handleMouseEnter)
+      window.removeEventListener('blur', handleMouseLeave)
       cancelAnimationFrame(animId)
     }
   }, [])
 
   return (
     <>
-      {/* 1. Gold Glow Light: 360px soft glow, sits above page (z-30) and below cursor (z-50) */}
+      {/* 1. Gold Glow Light: 360px soft glow, sits above page (z-30) and below cursor (z-[9999]) */}
       <div
         ref={glowRef}
         className="pointer-events-none fixed top-0 left-0 w-[360px] h-[360px] rounded-full z-30 will-change-transform select-none opacity-0 transition-opacity duration-300"
@@ -263,9 +273,9 @@ export default function CustomCursor() {
         aria-hidden="true"
       />
 
-      {/* 2. Cursor Layer (z-50) */}
+      {/* 2. Cursor Layer: Highest z-index above all canvases, overlays, project cards */}
       <div
-        className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none"
+        className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden select-none"
         aria-hidden="true"
       >
         {/* Ring / Crosshair container (lerped ~0.18, 150ms transition) */}

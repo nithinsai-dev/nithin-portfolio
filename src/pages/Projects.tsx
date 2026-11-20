@@ -25,7 +25,17 @@ export default function Projects() {
   // Hover state for floating preview
   const [hoveredProject, setHoveredProject] = useState<Project | null>(null)
   const [mousePos, setMousePos] = useState({ x: -9999, y: -9999 })
+  const [rowRatio, setRowRatio] = useState(0.5)
   const [isHoveringRow, setIsHoveringRow] = useState(false)
+
+  // Reset hover state on unmount / route leave
+  useEffect(() => {
+    return () => {
+      setIsHoveringRow(false)
+      setHoveredProject(null)
+      setMousePos({ x: -9999, y: -9999 })
+    }
+  }, [])
 
   // GitHub URL from contactContent (sanitized with safeUrl)
   const rawGithub =
@@ -98,7 +108,13 @@ export default function Projects() {
   }
 
   const handleRowMouseMove = (e: React.MouseEvent, project: Project) => {
+    const currentTarget = e.currentTarget as HTMLElement
+    const rect = currentTarget.getBoundingClientRect()
+    const relativeX = e.clientX - rect.left
+    const ratio = rect.width > 0 ? Math.max(0, Math.min(1, relativeX / rect.width)) : 0.5
+
     setMousePos({ x: e.clientX, y: e.clientY })
+    setRowRatio(ratio)
     setHoveredProject(project)
     setIsHoveringRow(true)
   }
@@ -106,6 +122,7 @@ export default function Projects() {
   const handleRowMouseLeave = () => {
     setIsHoveringRow(false)
     setHoveredProject(null)
+    setMousePos({ x: -9999, y: -9999 })
   }
 
   const counterStr = `${String(projects.length).padStart(2, '0')} projects`
@@ -191,6 +208,7 @@ export default function Projects() {
         project={hoveredProject}
         mouseX={mousePos.x}
         mouseY={mousePos.y}
+        rowRatio={rowRatio}
         isVisible={isHoveringRow}
       />
 
